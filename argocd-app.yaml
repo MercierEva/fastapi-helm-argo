@@ -9,7 +9,7 @@ spec:
     namespace: default
     server: 'https://kubernetes.default.svc'
   source:
-    repoURL: 'https://github.com/<ton-user>/project-devops'
+    repoURL: 'https://github.com/MercierEva/fastapi-helm-argo.git'
     targetRevision: HEAD
     path: charts/fastapi-chart
   project: default
