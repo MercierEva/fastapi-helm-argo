@@ -44,5 +44,5 @@ jobs:
           git commit -m "Update Helm chart image tag to latest"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.CR_PAT }}
 
