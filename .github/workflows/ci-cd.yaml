@@ -26,6 +26,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
+          context: ./app
+          file: ./app/Dockerfile
           push: true
           tags: ghcr.io/merciereva/fastapi:latest
 
