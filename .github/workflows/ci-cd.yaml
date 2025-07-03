@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: ghcr.io/${{ github.repository }}
+      IMAGE_NAME: ghcr.io/MercierEva
       CHART_PATH: charts/fastapi-chart
     
     steps:
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u mercier --password-stdin
 
       - name: Build and push Docker image
         run: |
@@ -39,5 +39,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add $CHART_PATH/values.yaml || true
           git commit -m "Update Helm chart image tag to latest" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.CR_PAT }}@github.com/${{ github.repository }}.git HEAD:main
+          git push https://x-access-token:${{ secrets.CR_PAT }}@github.com/MercierEva/fastapi-helm-argo.git HEAD:main
 
