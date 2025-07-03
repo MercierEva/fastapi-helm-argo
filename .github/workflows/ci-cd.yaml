@@ -1,4 +1,4 @@
-name: Build and Deploy FastAPI
+name: CI/CD FastAPI Helm ArgoCD
 
 on:
   push:
@@ -6,42 +6,38 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      IMAGE_NAME: ghcr.io/${{ github.repository }}
+      CHART_PATH: charts/fastapi-chart
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.CR_PAT }}
+        run: echo "${{ secrets.PAT_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./app
-          file: ./app/Dockerfile
-          push: true
-          tags: ghcr.io/merciereva/fastapi:latest
-
-      - name: Update Helm values.yaml with new image tag
         run: |
-          sed -i "s|repository: .*|repository: ghcr.io/${{ github.repository_owner }}/fastapi|" charts/fastapi-chart/values.yaml
-          sed -i "s|tag: .*|tag: latest|" charts/fastapi-chart/values.yaml
+          IMAGE_TAG=latest
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+          docker push $IMAGE_NAME:$IMAGE_TAG
+        env:
+          IMAGE_TAG: latest
 
-      - name: Commit and push updated values.yaml
+      - name: Update Helm chart with new image tag
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add charts/fastapi-chart/values.yaml
-          git commit -m "Update Helm chart image tag to latest"
-          git push https://x-access-token:${{ secrets.CR_PAT }}@github.com/${{ github.repository }}.git HEAD:main          
-      
+          sed -i "s|repository:.*|repository: $IMAGE_NAME|" $CHART_PATH/values.yaml
+          sed -i "s|tag:.*|tag: latest|" $CHART_PATH/values.yaml
+
+      - name: Commit and push updated Helm chart
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add $CHART_PATH/values.yaml || true
+          git commit -m "Update Helm chart image tag to latest" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.CR_PAT }}@github.com/${{ github.repository }}.git HEAD:main
 
