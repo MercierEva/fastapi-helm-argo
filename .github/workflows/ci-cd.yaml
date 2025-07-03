@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: ghcr.io/MercierEva
+      IMAGE_NAME: ghcr.io/merciereva/fastapi-helm-argo
       CHART_PATH: charts/fastapi-chart
     
     steps:
